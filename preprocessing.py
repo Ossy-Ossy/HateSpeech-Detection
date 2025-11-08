@@ -26,8 +26,14 @@ for zip_file, target_dir in [
     ("bert_model_sentiment_analysis-20251106T011939Z-1-001.zip", "bert_model")
 ]:
     if os.path.exists(zip_file) and not os.path.exists(target_dir):
-        os.makedirs(target_dir, exist_ok=True)
         shutil.unpack_archive(zip_file, target_dir)
+        # Flatten if only one folder inside
+        inner = os.path.join(target_dir, os.listdir(target_dir)[0])
+        if os.path.isdir(inner):
+            for f in os.listdir(inner):
+                shutil.move(os.path.join(inner, f), target_dir)
+            os.rmdir(inner)
+
       
 @st.cache_resource
 def load_models():
@@ -83,3 +89,4 @@ def predict_sentiment(text):
         return "No Hate Speech Detected"
     else:
         return "Hate Speech Detected"
+
