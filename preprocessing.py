@@ -85,9 +85,10 @@ def predict_sentiment(text):
     embedding = get_embeddings(text ,tokenizer, bert_model)
     embedding = embedding.reshape(1,-1)
     prediction = model.predict(embedding)[0][0]
-    if prediction < 0.5:
+    if prediction < 0.3:
         return "No Hate Speech Detected"
     else:
         return "Hate Speech Detected"
+
 
 
