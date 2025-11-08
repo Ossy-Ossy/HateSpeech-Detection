@@ -5,9 +5,9 @@ import emoji
 import spacy
 import torch
 import shutil
-import joblib
 import streamlit as st
 from transformers import AutoTokenizer, AutoModel
+from tensorflow.keras.models import load_model
 
 @st.cache_resource
 def load_spacy():
@@ -17,7 +17,7 @@ nlp = load_spacy()
 
 tokenizer_zip = "tokenizer_sentiment_analysis.zip"
 bert_model_zip = "bert_model_sentiment_analysis-20251106T011939Z-1-001.zip"
-model_path = "model_sentiment_analysis.joblib" 
+model_path = "model_sentiment_analysis.keras" 
 tokenizer_dir = "tokenizer"
 bert_dir = "bert_model" 
 
@@ -39,7 +39,7 @@ for zip_file, target_dir in [
 def load_models():
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_dir)
     bert_model = AutoModel.from_pretrained(bert_dir)
-    model = joblib.load(model_path)
+    model = load_model(model_path)
     bert_model.eval()
     return tokenizer, bert_model, model
 
@@ -84,9 +84,10 @@ def predict_sentiment(text):
     tokenizer, bert_model, model = load_models()
     embedding = get_embeddings(text ,tokenizer, bert_model)
     embedding = embedding.reshape(1,-1)
-    prediction = model.predict(embedding)[0]
-    if prediction == 0:
+    prediction = model.predict(embedding)[0][0]
+    if prediction < 0.5:
         return "No Hate Speech Detected"
     else:
         return "Hate Speech Detected"
+
 
